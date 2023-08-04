@@ -34,14 +34,10 @@ class Display
         # display tiles in here instead of in game
     end
 
-    def display_tiles(answer, matches)
-        # take answer and matches
-        # show tabs = answer length
-        length = answer.length
-        blanks = "_ "
-        total_blanks = blanks * length
-        puts total_blanks
-        # fill in correct matches
+    def display_tiles(tiles)
+        tiles_array = tiles.split('')
+        separated_tiles = tiles_array.join(' ')
+        puts separated_tiles
     end
 
     def display_already_guessed(input)
@@ -65,6 +61,7 @@ class Game
         @correct_letters = []
         @incorrect_letters = []
         @game_over = false
+        @blanks = ""
     end
     
     def check_length(word)
@@ -111,12 +108,15 @@ class Game
         end
         # if letter is included in answer
         # else add to incorrect
-        input_correct?(input) ? add_to_correct_letters(input) : add_to_incorrect_letters(input)
+        if input_correct?(input)
+            add_to_correct_letters(input)
+            change_blanks(input)
+        else
+            add_to_incorrect_letters(input)
+        end
         
         display_tiles
         show_board(input)
-        p @correct_letters
-        p @incorrect_letters
     end
 
 
@@ -125,7 +125,7 @@ class Game
     end
 
     def display_tiles
-        @display.display_tiles(@answer, @correct_letters)
+        @display.display_tiles(@blanks)
     end
 
     def add_to_correct_letters(correct_input)
@@ -151,9 +151,22 @@ class Game
         @display.display_answer(@answer)
     end
 
+    def create_blanks
+        length = @answer.length
+        blank = "_"
+        @blanks = blank * length
+    end
+
+    def change_blanks(input)
+        string_array = @answer.split("")
+        indices = string_array.each_index.select { |i| string_array[i] == input }
+        indices.each { |i| @blanks[i] = input}
+    end
+
     def play_game
         generate_word
         display_answer
+        create_blanks
         display_tiles
         until game_over?
             get_player_input
@@ -179,3 +192,4 @@ game.play_game
 # show correct letter and placement
 # if not included add to incorrect letter
 # show in incorrect letter
+
