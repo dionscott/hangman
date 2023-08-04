@@ -20,6 +20,20 @@ class Display
     def incorrect_input
         puts "Incorrect input. Try again."
     end
+
+    def display_board(letter, correct_letters, incorrect_letters)
+        puts "You have guessed '#{letter}'"
+    end
+
+    def display_tiles(answer, matches)
+        # take answer and matches
+        # show tabs = answer length
+        length = answer.length
+        blanks = "_ "
+        total_blanks = blanks * length
+        puts total_blanks
+        # fill in correct matches
+    end
 end
 
 class Game
@@ -27,6 +41,7 @@ class Game
         word_list = File.read('wordsheet.txt')
         list = word_list.split("\n")
         @valid_words = list.select { |word| check_length(word) }
+        @answer = ""
         @display = Display.new
         @player = Player.new
         @correct_letters = []
@@ -43,7 +58,7 @@ class Game
     end
 
     def generate_word
-        @valid_words.sample
+        @answer = @valid_words.sample
     end
 
     def is_string?(string)
@@ -65,10 +80,27 @@ class Game
             @display.incorrect_input
             input = @player.get_input
         end
-        puts "Correct input"
+        show_board(input)
+    end
+
+    def show_board(input)
+        @display.display_board(input, @correct_letters, @incorrect_letters)
+    end
+
+    def display_tiles
+        @display.display_tiles(@answer, @correct_letters)
     end
 end
-
+# initialize game
 game = Game.new
+# generate the game word
 p game.generate_word
+# show the number of places for board
+game.display_tiles
+# get player input
 p game.get_player_input
+# check player answer against word
+# if included add to correct letter
+# show correct letter and placement
+# if not included add to incorrect letter
+# show in incorrect letter
