@@ -21,17 +21,11 @@ class Display
         puts "Incorrect input. Try again."
     end
 
-    def display_board(letter, correct_letters, incorrect_letters)
-        puts "You have guessed '#{letter}'"
-        unless correct_letters.empty?
-            # show correct letters
-            puts "Your correct guesses are #{correct_letters. join(", ")}"
-        end
-        unless incorrect_letters.empty?
-            # show incorrect letters
-            puts "Your incorrect guesses are #{incorrect_letters. join(", ")}"
-        end
-        # display tiles in here instead of in game
+    def display_board(letter, correct_letters, incorrect_letters, tiles)
+        puts "You have guessed '#{letter}'."
+        puts "Correct Letters: #{correct_letters. join(", ")}"
+        puts "Incorrect Letters: #{incorrect_letters. join(", ")}"
+        display_tiles(tiles)
     end
 
     def display_tiles(tiles)
@@ -48,6 +42,25 @@ class Display
         puts "The answer is #{answer}."
     end
 
+    def display_turn(turn, number_of_incorrect)
+        puts "It is turn ##{turn}."
+        if number_of_incorrect == 4    
+            puts "Any more incorrect guesses and you lose. Choose wisely!"
+        elsif number_of_incorrect == 0
+            puts "There are no incorrect guesses."
+        else
+            puts "There are #{number_of_incorrect} incorrect guesses.
+            You have #{5 - number_of_incorrect} incorrect guesses left."
+        end
+    end
+
+    def display_win
+        puts "Congrats you win!"
+    end
+
+    def display_loss
+        puts "Dang. You lost. Better luck next time."
+    end
 end
 
 class Game
@@ -60,8 +73,8 @@ class Game
         @player = Player.new
         @correct_letters = []
         @incorrect_letters = []
-        @game_over = false
         @blanks = ""
+        @turn = 0
     end
     
     def check_length(word)
@@ -114,14 +127,16 @@ class Game
         else
             add_to_incorrect_letters(input)
         end
-        
-        display_tiles
         show_board(input)
+        show_turn
     end
 
+    def show_turn
+        @display.display_turn(@turn, @incorrect_letters.length)
+    end
 
     def show_board(input)
-        @display.display_board(input, @correct_letters, @incorrect_letters)
+        @display.display_board(input, @correct_letters, @incorrect_letters, @blanks)
     end
 
     def display_tiles
@@ -151,6 +166,14 @@ class Game
         @display.display_answer(@answer)
     end
 
+    def display_win
+        @display.display_win
+    end
+
+    def display_loss
+        @display.display_loss
+    end
+
     def create_blanks
         length = @answer.length
         blank = "_"
@@ -169,19 +192,26 @@ class Game
         create_blanks
         display_tiles
         until game_over?
+            @turn += 1
             get_player_input
         end
-        
+        game_won? ? display_win : display_loss
     end
 
-    # complete game over check
+    def game_loss?
+        @incorrect_letters.length >= 5 ? true : false
+    end
+
+    def game_won?
+        @blanks.include?("_") ? false : true
+    end
+
     def game_over?
-        @game_over
+        game_loss? || game_won?
     end
 
-    #changes the status to true
     def game_over
-        @game_over = true
+        @game_over
     end
 end
 # initialize game
