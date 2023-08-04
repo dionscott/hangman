@@ -21,6 +21,10 @@ class Display
         puts "Incorrect input. Try again."
     end
 
+    def display_goodbye
+        puts "Thanks for playing!"
+    end
+
     def display_board(letter, correct_letters, incorrect_letters, tiles)
         puts "You have guessed '#{letter}'."
         puts "Correct Letters: #{correct_letters. join(", ")}"
@@ -42,6 +46,10 @@ class Display
         puts "The answer is #{answer}."
     end
 
+    def display_yes_or_no
+        puts "Please enter 'y', 'yes', 'n', or 'no'."
+    end
+
     def display_turn(turn, number_of_incorrect)
         puts "It is turn ##{turn}."
         if number_of_incorrect == 4    
@@ -54,12 +62,18 @@ class Display
         end
     end
 
+    def play_again
+        puts "That was fun. Want to play again?"
+    end
+
     def display_win
         puts "Congrats you win!"
+        play_again
     end
 
     def display_loss
         puts "Dang. You lost. Better luck next time."
+        play_again
     end
 end
 
@@ -77,6 +91,12 @@ class Game
         @turn = 0
     end
     
+    def reset_game
+        @correct_letters = []
+        @incorrect_letters = []
+        @turn = 0
+    end
+
     def check_length(word)
         length = word.length
         if length >= 5 && length <= 12
@@ -129,6 +149,26 @@ class Game
         end
         show_board(input)
         show_turn
+    end
+
+    def play_again
+        # get player input
+        valid_inputs = ["y", "yes", "n", "no"]
+        @display.display_yes_or_no
+        input = @player.get_input
+        # check if y, n, no, or yes
+        until valid_inputs.include?(input)
+            @display.incorrect_input
+            @display.display_yes_or_no
+            input = @player.get_input
+        end
+        if valid_inputs.index(input) <= 1
+            # reset game and start playing
+            reset_game
+            play_game
+        else
+            @display.display_goodbye
+        end
     end
 
     def show_turn
@@ -196,6 +236,7 @@ class Game
             get_player_input
         end
         game_won? ? display_win : display_loss
+        play_again
     end
 
     def game_loss?
@@ -217,9 +258,3 @@ end
 # initialize game
 game = Game.new
 game.play_game
-# check player answer against word
-# if included add to correct letter
-# show correct letter and placement
-# if not included add to incorrect letter
-# show in incorrect letter
-
