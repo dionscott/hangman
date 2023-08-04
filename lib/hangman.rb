@@ -23,6 +23,15 @@ class Display
 
     def display_board(letter, correct_letters, incorrect_letters)
         puts "You have guessed '#{letter}'"
+        unless correct_letters.empty?
+            # show correct letters
+            puts "Your correct guesses are #{correct_letters. join(", ")}"
+        end
+        unless incorrect_letters.empty?
+            # show incorrect letters
+            puts "Your incorrect guesses are #{incorrect_letters. join(", ")}"
+        end
+        # display tiles in here instead of in game
     end
 
     def display_tiles(answer, matches)
@@ -34,6 +43,15 @@ class Display
         puts total_blanks
         # fill in correct matches
     end
+
+    def display_already_guessed(input)
+        puts "You have already guessed #{input}. Try again."
+    end
+
+    def display_answer(answer)
+        puts "The answer is #{answer}."
+    end
+
 end
 
 class Game
@@ -46,6 +64,7 @@ class Game
         @player = Player.new
         @correct_letters = []
         @incorrect_letters = []
+        @game_over = false
     end
     
     def check_length(word)
@@ -69,8 +88,18 @@ class Game
         end
     end
 
+    # if it is one letter and is a letter and hasn't been guessed
     def valid_input?(string)
-        true if is_string?(string) && string.length == 1
+        if is_string?(string) && string.length == 1
+            if already_guessed?(string)
+                @display.display_already_guessed(string)
+                false
+            else
+                true
+            end
+        else
+            false
+        end
     end
 
     def get_player_input
@@ -80,8 +109,16 @@ class Game
             @display.incorrect_input
             input = @player.get_input
         end
+        # if letter is included in answer
+        # else add to incorrect
+        input_correct?(input) ? add_to_correct_letters(input) : add_to_incorrect_letters(input)
+        
+        display_tiles
         show_board(input)
+        p @correct_letters
+        p @incorrect_letters
     end
+
 
     def show_board(input)
         @display.display_board(input, @correct_letters, @incorrect_letters)
@@ -90,15 +127,53 @@ class Game
     def display_tiles
         @display.display_tiles(@answer, @correct_letters)
     end
+
+    def add_to_correct_letters(correct_input)
+        @correct_letters << correct_input
+    end
+
+    def add_to_incorrect_letters(incorrect_input)
+        @incorrect_letters << incorrect_input
+    end
+
+    # check if the input is correct or incorrect
+    def input_correct?(input)
+        @answer.include?(input)
+    end
+
+    # check if the input has already been guessed
+    def already_guessed?(input)
+        all_guesses = @correct_letters + @incorrect_letters
+        all_guesses.include?(input)
+    end
+
+    def display_answer
+        @display.display_answer(@answer)
+    end
+
+    def play_game
+        generate_word
+        display_answer
+        display_tiles
+        until game_over?
+            get_player_input
+        end
+        
+    end
+
+    # complete game over check
+    def game_over?
+        @game_over
+    end
+
+    #changes the status to true
+    def game_over
+        @game_over = true
+    end
 end
 # initialize game
 game = Game.new
-# generate the game word
-p game.generate_word
-# show the number of places for board
-game.display_tiles
-# get player input
-p game.get_player_input
+game.play_game
 # check player answer against word
 # if included add to correct letter
 # show correct letter and placement
